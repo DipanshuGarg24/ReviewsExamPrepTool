@@ -1,0 +1,45 @@
+{
+    "institutions": [
+        {
+            "_id": "inst_01",
+            "name": "IIT Bombay",
+            "slug": "iit-bombay",
+            "type": "IIT",
+            "location": "Mumbai, Maharashtra",
+            "nirf": "#3 in Engineering",
+            "nirfNum": 3,
+            "est": "1958",
+            "fees": "₹1.2 Lakhs",
+            "size": "550 Acres",
+            "highestCTC": "₹1.5 Crore",
+            "avgCTC": "₹22.5 LPA",
+            "hostels": "18 Hostels",
+            "students": "10,000+",
+            "img": "https://images.unsplash.com/photo-1562774053-701939374585?w=600&q=80",
+            "about": "IIT Bombay is a globally recognized institute of national importance...",
+            "departments": ["CSE", "Electrical", "Mechanical", "Aerospace"],
+            "facilities": ["Library", "Hostel", "Sports Complex", "Research Lab"],
+            "ratings": { "academics": 4.8, "faculty": 4.7, "placements": 4.9, "campus": 4.5, "hostel": 3.8, "sports": 4.2 }
+        }
+    ],
+    "reviews": [],
+    "cutoffs": [],
+    "placements": [
+        {
+            "_id": "plc_01",
+            "instId": "inst_01",
+            "year": "2025",
+            "branch": "CSE",
+            "course": "B.Tech",
+            "eligible": 140,
+            "placed": 138,
+            "highCTC": "₹1.5 Cr",
+            "avgCTC": "₹32 LPA",
+            "medCTC": "₹28 LPA",
+            "intlOffers": 12,
+            "ppoOffers": 85,
+            "topRecruiters": ["Google", "Microsoft", "Jane Street"]
+        }
+    ],
+    "users": []
+}
