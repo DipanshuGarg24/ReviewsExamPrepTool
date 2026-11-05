@@ -118,7 +118,7 @@ function AuthArea({ id }) {
   return (
     <div id={id}>
       {user ? (<>
-        <span className="auth-user" style={{ fontSize: 13, fontWeight: 600, color: 'var(--indigo)' }}>Hi, {user.name}</span>
+        <span className="auth-user" style={{ fontSize: 13, fontWeight: 600, color: 'var(--indigo)' }}>Hi, {user?.name || 'User'}</span>
         <button className="btn btn-ghost btn-sm" onClick={logout} style={{ marginLeft: 8 }}>Log Out</button>
       </>) : <button className="btn btn-ghost btn-sm" onClick={() => setAuthOpen(true)}>Log In</button>}
     </div>
@@ -698,7 +698,14 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('reviews');
   const [placeF, setPlaceF] = useState({ year: 'All', branch: 'All', course: 'All' });
   const [cutF, setCutF] = useState({ year: 'All', branch: 'All', category: 'All' });
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cf_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
   const [authOpen, setAuthOpen] = useState(false), [reviewOpen, setReviewOpen] = useState(false);
   const [rv, setRv] = useState(RV0);
   const [toastState, setToastState] = useState({ msg: 'Done!', show: false });
@@ -707,7 +714,8 @@ export default function App() {
   const toastTimer = useRef();
 
   const toast = (msg) => { setToastState({ msg, show: true }); clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToastState((t) => ({ ...t, show: false })), 3200); };
-  const closeModals = () => { setAuthOpen(false); setReviewOpen(false); };
+  const closeModals = () => { setAuthOpen(false); setReviewOpen(false); }
+
 
   /* --- router --- */
   const applyRoute = useCallback(() => {
@@ -747,12 +755,26 @@ export default function App() {
   const doLogin = async (email, password) => {
     if (!email || !password) { toast('Enter your email and password'); return; }
     try {
-      const d = await API.auth.login(email, password);
-      if (!d?.token) throw new Error(d?.message || 'Login failed');
-      setToken(d.token); setUser(d.user); closeModals(); toast('Welcome, ' + d.user.name + '!');
-    } catch (e) { toast(e.message); }
+      // API.auth.login returns the user object directly (d.data)
+      const userData = await API.auth.login(email, password);
+      
+      if (!userData?.token) throw new Error('Login failed: No token received');
+      
+      setToken(userData.token);
+      setUser(userData); // ✅ Pass userData directly (it contains name, email, token, etc.)
+      closeModals();
+      
+      toast(`Welcome, ${userData?.name || 'User'}!`); // ✅ Safe property access
+    } catch (e) { 
+      toast(e.message); 
+    }
   };
-  const logout = () => { setUser(null); clearToken(); toast('Logged out'); };
+  const logout = () => {
+    toast('Logged out successfully');
+    setUser(null);
+    clearSession();
+    
+  };
 
   /* --- header search (drives whichever view is open) --- */
   const onHeaderSearch = (v) => {
@@ -772,10 +794,39 @@ export default function App() {
 
   /* --- write-a-review modal --- */
   const openReviewModal = () => {
+    // 🔴 Check if user is logged in first
+    if (!user) {
+      setAuthOpen(true);
+      toast('Please log in first to write a review!');
+      return;
+    }
+
     const inst = db.institutions.find((i) => i.id === currentInstId);
-    setRv({ ...rv, name: '', email: '', contact: '', rank: '', score: '', cgpa: '', course: 'B.Tech', rating: 5, branch: inst?.departments[0] || '', busy: false });
+    
+    // Grab logged-in user details if available (from local storage / session)
+    let loggedUser = null;
+    try {
+      const stored = localStorage.getItem('cf_user');
+      if (stored) loggedUser = JSON.parse(stored);
+    } catch (e) {}
+
+    setRv({
+      ...rv,
+      name: loggedUser?.name || user?.name || '',
+      email: loggedUser?.email || user?.email || '',
+      contact: loggedUser?.mobile || user?.mobile || '',
+      rank: '',
+      score: '',
+      cgpa: '',
+      course: 'B.Tech',
+      rating: 5,
+      branch: inst?.departments[0] || '',
+      busy: false
+    });
     setReviewOpen(true);
   };
+
+
   const submitReview = async () => {
     const pros = rv.pros.trim(), body = rv.body.trim();
     if (!pros || !body) { toast('Please fill in Pros and your Overall Experience!'); return; }

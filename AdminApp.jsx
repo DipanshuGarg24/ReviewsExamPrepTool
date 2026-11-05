@@ -1,6 +1,6 @@
 // AdminApp.jsx
 import { useState, useEffect, useRef } from 'react';
-import { API, loadDB, getToken, setToken, clearToken } from './masterApi';
+import { API, loadDB, getToken, setToken, clearToken,CONFIG} from './masterApi';
 import './styles.css';
 import './admin.css';
 
@@ -27,7 +27,10 @@ const EMPTY_INST = {
 };
 
 export default function AdminApp() {
-  const [user, setUser] = useState(null);
+  // 2. Inside AdminApp(), set a default admin user when LOGIN_ENABLED is false:
+  const [user, setUser] = useState(
+    !CONFIG.LOGIN_ENABLED ? { name: 'Super Admin', role: 'superAdmin' } : null
+  );
   const [loginForm, setLoginForm] = useState({ email: 'admin@campusfile.in', password: 'admin' });
   const [db, setDb] = useState({ institutions: [], reviews: [], cutoffs: {}, placements: {} });
   const [tab, setTab] = useState('institutions');
@@ -65,7 +68,7 @@ export default function AdminApp() {
 
   const refreshData = async () => {
     try {
-      const d = await loadDB();
+      const d = await loadDB(true);
       setDb(d);
       if (!selectedInstId && d.institutions.length > 0) {
         setSelectedInstId(d.institutions[0].id);
@@ -76,6 +79,10 @@ export default function AdminApp() {
   };
 
   useEffect(() => {
+    if (!CONFIG.LOGIN_ENABLED) {
+      refreshData();
+      return;
+    }
     if (getToken()) {
       API.auth.me()
         .then((u) => {
@@ -689,48 +696,80 @@ export default function AdminApp() {
           )}
 
           {/* ================= TAB 5: REVIEWS MODERATION ================= */}
+          {/* ================= TAB 5: REVIEWS MODERATION ================= */}
           {tab === 'reviews' && (
             <div className="adm-card">
               <div className="adm-card-head">
                 <h3 className="adm-card-title">All Student Reviews ({db.reviews.length})</h3>
               </div>
-              <table className="dt">
-                <thead>
-                  <tr><th>College</th><th>Author</th><th>Branch & Batch</th><th>Rating</th><th>Review Summary</th><th>Helpful</th><th></th></tr>
-                </thead>
-                <tbody>
-                  {db.reviews.map((r) => {
-                    const inst = db.institutions.find((i) => i.id === r.instId);
-                    return (
-                      <tr key={r.id}>
-                        <td><b>{inst?.name || r.instId}</b></td>
-                        <td>{r.author}</td>
-                        <td>{r.branch} · {r.batch}</td>
-                        <td><span className={`rating-badge r${r.rating}`} style={{ padding: '4px 8px', fontSize: 12 }}>{r.rating}/5 ★</span></td>
-                        <td style={{ maxWidth: 420, fontSize: 12.5 }}>
-                          <div style={{ color: '#16a34a' }}><b>✓ Pros:</b> {r.pros}</div>
-                          <div style={{ color: '#dc2626' }}><b>✗ Cons:</b> {r.cons}</div>
-                          <div style={{ marginTop: 4, color: '#334155' }}>{r.body}</div>
-                        </td>
-                        <td>👍 {r.helpful}</td>
-                        <td>
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            style={{ color: '#ef4444' }}
-                            onClick={async () => {
-                              await API.reviews.remove(r.id);
-                              notify('Review removed');
-                              refreshData();
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="table-scroll">
+                <table className="dt">
+                  <thead>
+                    <tr>
+                      <th>College</th>
+                      <th>Student & Contact Info (Private)</th>
+                      <th>Academic Profile</th>
+                      <th>Rating</th>
+                      <th>Review Summary</th>
+                      <th>Helpful</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {db.reviews.map((r) => {
+                      const inst = db.institutions.find((i) => i.id === r.instId);
+                      return (
+                        <tr key={r.id}>
+                          <td><b>{inst?.name || r.instId}</b></td>
+                          <td>
+                            <b style={{ fontSize: 14, color: '#0f172a' }}>{r.author}</b>
+                            <div style={{ fontSize: 12, color: '#3d46f2', marginTop: 2 }}>
+                              ✉️ {r.email ? <a href={`mailto:${r.email}`} style={{ color: 'inherit' }}>{r.email}</a> : 'No email'}
+                            </div>
+                            <div style={{ fontSize: 12, color: '#0f766e', marginTop: 2 }}>
+                              📞 {r.contact ? <a href={`tel:${r.contact}`} style={{ color: 'inherit' }}>{r.contact}</a> : 'No contact'}
+                            </div>
+                          </td>
+                          <td style={{ fontSize: 12.5 }}>
+                            <b>{r.branch}</b> ({r.course || 'B.Tech'})
+                            <div style={{ color: '#64748b' }}>Batch: {r.batch} · {r.exam}</div>
+                            {(r.rank || r.cgpa) && (
+                              <div style={{ color: '#64748b', fontSize: 11.5 }}>
+                                {r.rank ? `AIR ${r.rank}` : ''} {r.cgpa ? `· CGPA ${r.cgpa}` : ''}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <span className={`rating-badge r${r.rating}`} style={{ padding: '4px 8px', fontSize: 12 }}>
+                              {r.rating}/5 ★
+                            </span>
+                          </td>
+                          <td style={{ maxWidth: 380, fontSize: 12.5 }}>
+                            <div style={{ color: '#16a34a' }}><b>✓ Pros:</b> {r.pros}</div>
+                            <div style={{ color: '#dc2626' }}><b>✗ Cons:</b> {r.cons}</div>
+                            <div style={{ marginTop: 4, color: '#334155' }}>{r.body}</div>
+                          </td>
+                          <td>👍 {r.helpful}</td>
+                          <td>
+                            <button
+                              className="btn btn-ghost btn-sm"
+                              style={{ color: '#ef4444' }}
+                              onClick={async () => {
+                                if (!window.confirm('Delete this review permanently?')) return;
+                                await API.reviews.remove(r.id);
+                                notify('Review removed');
+                                refreshData();
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
