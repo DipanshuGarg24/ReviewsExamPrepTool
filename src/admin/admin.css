@@ -1,0 +1,158 @@
+/* admin.css - Single-flow, spacious layout */
+.adm-page {
+  min-height: 100vh;
+  background: #f6f8fc;
+  color: #0f172a;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.adm-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 18px 36px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.adm-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adm-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #3d46f2;
+  color: #ffffff;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adm-nav-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adm-tab-btn {
+  padding: 9px 16px;
+  border-radius: 9px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.adm-tab-btn:hover {
+  border-color: #3d46f2;
+  color: #3d46f2;
+}
+
+.adm-tab-btn.active {
+  background: #3d46f2;
+  border-color: #3d46f2;
+  color: #ffffff;
+}
+
+/* Single-flow vertical container */
+.adm-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px 24px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.adm-section-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.adm-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.adm-section-head h2 {
+  margin: 0;
+  font-size: 19px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.adm-section-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.adm-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.adm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.adm-pill button {
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.adm-gate-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f6f8fc;
+}
+
+.adm-gate-card {
+  max-width: 460px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 36px 32px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
