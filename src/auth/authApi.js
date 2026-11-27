@@ -43,7 +43,12 @@ export const loginWithGoogleAccessToken = async (accessToken) => {
   });
   const googleUser = await infoRes.json();
   if (!googleUser?.email) throw new Error("Could not fetch Google account email.");
-  return postJson(AUTH_CONFIG.GOOGLE_LOGIN_URL, { email: googleUser.email }, "Google login failed");
+  // body the callback API expects: { email, googleToken } (googleToken = Google access token)
+  return postJson(
+    AUTH_CONFIG.GOOGLE_LOGIN_URL,
+    { email: googleUser.email, googleToken: accessToken },
+    "Google login failed"
+  );
 };
 
 // Stores the session (encrypted) and returns the normalized user.
